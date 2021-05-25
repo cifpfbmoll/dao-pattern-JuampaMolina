@@ -1,13 +1,16 @@
 package org.acme.rest.json;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Set;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.core.MediaType;
@@ -15,32 +18,33 @@ import javax.ws.rs.core.MediaType;
 @Path("/fruits")
 public class FruitResource {
 
-    private Set<Fruit> fruits = Collections.newSetFromMap(Collections.synchronizedMap(new LinkedHashMap<>()));
-
-    public FruitResource() {
-        fruits.add(new Fruit("Apple", "Winter fruit"));
-        fruits.add(new Fruit("Pineapple", "Tropical fruit"));
-    }
+    @Inject
+    ActiveRecord ar;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Set<Fruit> list() {
-        return fruits;
+    public List<Fruit> list() {
+        return ar.getFruits();
     }
 
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @Transactional
     @POST
-    public Set<Fruit> add(Fruit fruit) {
-        fruits.add(fruit);
-        return fruits;
+    public List<Fruit> add(Fruit fruit) {
+        ar.addFruit(fruit);
+        return list();
     }
 
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @Transactional
     @DELETE
-    public Set<Fruit> delete(Fruit fruit) {
-        fruits.removeIf(existingFruit -> existingFruit.name.contentEquals(fruit.name));
-        return fruits;
+    @Path("{name}")
+    public List<Fruit> delete(@NotNull @PathParam("name") String name) {
+        Fruit currentFruit = Fruit.find("name", name).firstResult();
+        System.out.println(currentFruit);
+        ar.deleteFruit(currentFruit);
+        return list();
     }
 }
