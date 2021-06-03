@@ -3,10 +3,14 @@ package org.acme.rest.json;
 import java.util.List;
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Singleton;
 
-@ApplicationScoped
+@Singleton
 public class FruitActiveRecord {
+
+    public FruitActiveRecord() {
+
+    }
 
     public List<Fruit> getFruits() {
         return Fruit.findAll().list();
