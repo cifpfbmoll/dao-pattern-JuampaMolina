@@ -21,7 +21,7 @@ import javax.validation.constraints.NotNull;
 public class FruitResource {
 
     @Inject
-    FruitActiveRecord ar;
+    FruitService ar;
 
     public FruitResource() {
     }

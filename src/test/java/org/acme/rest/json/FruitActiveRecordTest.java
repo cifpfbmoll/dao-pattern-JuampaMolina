@@ -13,53 +13,55 @@ import javax.transaction.Transactional;
 public class FruitActiveRecordTest {
 
     @Inject
-    FruitActiveRecord activeRecord; // se inicializa como null >:(
+    FruitService fruitService;
 
     @Test
     void test_lookupService() {
-        Assertions.assertThat(this.activeRecord).isNotNull();
+        Assertions.assertThat(this.fruitService).isNotNull();
     }
 
     @Test
     public void checkSetupTest() {
-        Assertions.assertThat(this.activeRecord.getFruits()).hasSize(2);
+        Assertions.assertThat(this.fruitService.getFruits()).hasSize(2);
     }
 
     @Test
     public void containsFruitTest() {
-        Assertions.assertThat(this.activeRecord.getFruits().stream().anyMatch(f -> f.name.equalsIgnoreCase("Orange")))
+        Assertions.assertThat(this.fruitService.getFruits().stream().anyMatch(f -> f.name.equalsIgnoreCase("Orange")))
                 .isTrue();
     }
 
     @Test
     public void removeFruitTest() {
-        Optional<Fruit> fruit = this.activeRecord.getFruit("Orange");
+        Optional<Fruit> fruit = this.fruitService.getFruit("Orange");
         if (fruit.isPresent()) {
-            this.activeRecord.deleteFruit(fruit.get());
+            this.fruitService.deleteFruit(fruit.get());
         }
 
-        Assertions.assertThat(this.activeRecord.getFruits()).hasSize(1);
-        Assertions.assertThat(this.activeRecord.getFruits().stream().anyMatch(f -> f.name.equalsIgnoreCase("Orange")))
+        Assertions.assertThat(this.fruitService.getFruits()).hasSize(1);
+        Assertions.assertThat(this.fruitService.getFruits().stream().anyMatch(f -> f.name.equalsIgnoreCase("Orange")))
                 .isFalse();
 
-        Fruit.persist(new Fruit("Orange", "Summer fruit"));
+        this.fruitService.addFruit(new Fruit("Orange", "Summer fruit"));
     }
 
     @Test
     public void addFruitTest() {
-        this.activeRecord.addFruit(new Fruit("Mandarina", "No valgo pa zumos"));
-        Assertions.assertThat(this.activeRecord.getFruits()).hasSize(3);
+        this.fruitService.addFruit(new Fruit("Mandarina", "No valgo pa zumos"));
+        Assertions.assertThat(this.fruitService.getFruits()).hasSize(3);
         Assertions
-                .assertThat(this.activeRecord.getFruits().stream().anyMatch(f -> f.name.equalsIgnoreCase("Mandarina")))
+                .assertThat(this.fruitService.getFruits().stream().anyMatch(f -> f.name.equalsIgnoreCase("Mandarina")))
                 .isTrue();
 
-        Fruit fruit = Fruit.find("name", "Mandarina").firstResult();
-        fruit.delete();
+        Optional<Fruit> fruit = fruitService.getFruit("Mandarina");
+        if (fruit.isPresent()) {
+            this.fruitService.deleteFruit(fruit.get());
+        }
     }
 
     @Test
     public void getFruitTest() {
-        Assertions.assertThat(this.activeRecord.getFruit("Orange").get()).hasFieldOrPropertyWithValue("name", "Orange");
-        Assertions.assertThat(this.activeRecord.getFruit("Water")).isEmpty();
+        Assertions.assertThat(this.fruitService.getFruit("Orange").get()).hasFieldOrPropertyWithValue("name", "Orange");
+        Assertions.assertThat(this.fruitService.getFruit("Water")).isEmpty();
     }
 }
